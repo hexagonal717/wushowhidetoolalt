@@ -1,15 +1,78 @@
 # Function to check if the script is running as Administrator
-function Test-Admin {
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+function Test-IsAdministrator {
+    $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object System.Security.Principal.WindowsPrincipal($identity)
+    return $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# If not running as Administrator, restart the script with elevated privileges
-if (-not (Test-Admin)) {
-    Start-Process -FilePath "powershell" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+# Check if the script is running as Administrator
+if (-not (Test-IsAdministrator)) {
+    Write-Host "This script needs to be run as an Administrator."
+    Write-Host "Trying to restart with elevated privileges..."
+    Start-Process powershell -ArgumentList "$($MyInvocation.MyCommand.Definition)" -Verb RunAs
     exit
 }
+
+# Define the sageset number and format it with leading zeros
+$sagesetNumber = 500
+$formattedNumber = $sagesetNumber.ToString("D4")  # Formats the number as four digits
+$stateFlagsName = "StateFlags$formattedNumber"
+
+# Define the path to the registry key for VolumeCaches
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches"
+
+# Define the list of specific cleanup options to modify
+$cleanupOptions = @(
+    "Delivery Optimization Files",
+    "Device Driver Packages",
+    "Temporary Files",
+    "Windows Error Reporting Files",
+    "Temporary Setup Files",
+    "Update Cleanup"
+)
+
+# Set the StateFlags DWORD value for the specified sageset number
+foreach ($option in $cleanupOptions) {
+    $optionPath = "$regPath\$option"
+    if (Test-Path $optionPath) {
+        # Set the StateFlags DWORD for the formatted sageset number
+        Set-ItemProperty -Path $optionPath -Name $stateFlagsName -Value 2
+    } else {
+        Write-Host "Registry path not found for option: $option"
+    }
+}
+
+# Run the cleanmgr command with the specified sageset number
+try {
+    Start-Process cleanmgr -ArgumentList "/sagerun:$sagesetNumber" -Wait -NoNewWindow
+    Write-Host "cleanmgr /sagerun:$sagesetNumber has been executed."
+} catch {
+    Write-Host "Failed to run cleanmgr. Error: $_"
+}
+
+# Remove the StateFlags DWORD value for the specified sageset number
+foreach ($option in $cleanupOptions) {
+    $optionPath = "$regPath\$option"
+    if (Test-Path $optionPath) {
+        # Remove the StateFlags DWORD if it exists
+        Remove-ItemProperty -Path $optionPath -Name $stateFlagsName -ErrorAction SilentlyContinue
+    }
+}
+
+Write-Host "StateFlags values for sageset number $sagesetNumber have been removed for specified cleanup options."
+
+# Disable Delivery Optimization by setting the Start value of the DoSvc service to 4
+Write-Host "Disabling Delivery Optimization..."
+
+$deliveryOptimizationServicePath = "HKLM:\SYSTEM\CurrentControlSet\Services\DoSvc"
+if (Test-Path $deliveryOptimizationServicePath) {
+    Set-ItemProperty -Path $deliveryOptimizationServicePath -Name "Start" -Value 4
+    Write-Host "Delivery Optimization service has been disabled."
+} else {
+    Write-Host "Delivery Optimization service registry path not found."
+}
+
+# Continue with the rest of the script
 
 # Define the path to SoftwareDistribution
 $softwareDistributionPath = "C:\Windows\SoftwareDistribution"
@@ -115,15 +178,17 @@ function Hide-OldGPUDrivers {
 # Save the script content to the specified path
 $scriptContent = @'
 # Function to check if the script is running as Administrator
-function Test-Admin {
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+function Test-IsAdministrator {
+    $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object System.Security.Principal.WindowsPrincipal($identity)
+    return $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# If not running as Administrator, restart the script with elevated privileges
-if (-not (Test-Admin)) {
-    Start-Process -FilePath "powershell" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+# Check if the script is running as Administrator
+if (-not (Test-IsAdministrator)) {
+    Write-Host "This script needs to be run as an Administrator."
+    Write-Host "Trying to restart with elevated privileges..."
+    Start-Process powershell -ArgumentList "$($MyInvocation.MyCommand.Definition)" -Verb RunAs
     return
 }
 
@@ -172,18 +237,36 @@ Write-Host "Saving script content to $scriptPath..."
 $scriptContent | Set-Content -Path $scriptPath -Force
 Write-Host "Script saved."
 
-# Create a scheduled task to run the script at every logon
+# Create a scheduled task with updated settings
+$taskSettings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
+    -StartWhenAvailable `
+    -DontStopOnIdleEnd `
+    -IdleDuration (New-TimeSpan -Minutes 10) `
+    -IdleWaitTimeout (New-TimeSpan -Minutes 30) `
+    -ExecutionTimeLimit (New-TimeSpan -Hours 1)
+
+# Define the task details
 $taskName = "HideGPUDriversFromWU"
 $taskDescription = "Hide Old GPU Drivers from Windows Update on startup."
-$taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File $scriptPath -WindowStyle Hidden"
+$taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$scriptPath`" -WindowStyle Hidden"
 $taskTrigger = New-ScheduledTaskTrigger -AtLogon
 $taskPrincipal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 
+# Create and register the scheduled task
 try {
-    Register-ScheduledTask -TaskName $taskName -Description $taskDescription -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Force
+    Register-ScheduledTask -TaskName $taskName `
+        -Description $taskDescription `
+        -Action $taskAction `
+        -Trigger $taskTrigger `
+        -Principal $taskPrincipal `
+        -Settings $taskSettings `
+        -Force
     Write-Host "Scheduled task '$taskName' has been created to run at logon."
 } catch {
-    Write-Host "Failed to create scheduled task. Exiting script."
+    Write-Host "Failed to create scheduled task. Error details:"
+    Write-Host $_.Exception.Message
     exit
 }
 
