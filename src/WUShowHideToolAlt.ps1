@@ -166,7 +166,7 @@ function Hide-OldGPUDrivers {
             if ($hideKeywords | Where-Object { $title -match $_ }) {
                 # Hide updates that match hideKeywords
                 Hide-WindowsUpdate -Title $title -Confirm:$false
-                Write-Host "Hidden update: $title"
+                Write-Host "Hiding Old GPU drivers..."
             }
         }
         Write-Host "Old GPU drivers have been successfully hidden from Windows Update."
@@ -273,5 +273,6 @@ try {
 # Run the logic to hide old GPU drivers directly within the script
 Hide-OldGPUDrivers
 
-# Exit the script automatically
-exit
+# Keep the script running until the user closes it manually
+Write-Host "Press Enter to exit..."
+Read-Host

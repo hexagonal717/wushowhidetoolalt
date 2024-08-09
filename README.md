@@ -69,42 +69,37 @@ A scheduled task is created to run a PowerShell script at logon that hides old G
         - This will clone the entire repository to your local machine, and you can access the `WUShowHideToolAlt.ps1` script.
 
 2. **Ensure an Internet Connection:**
-    - The script depends on Windows Update to retrieve the old drivers from the server so that we can block the old drivers.
+    - The script depends on Windows Update to retrieve the old drivers from the server so that it can block the old drivers.
 
 3. **Pause Windows Update:**
     - Go to Settings > Windows Update > Pause (pause for 1 week).
 
-4. **Open Windows Terminal or CMD.**
+4. **Run the `run_this.bat` file**:
+    - Locate the `run_this.bat` file in the directory where you extracted or cloned the repository.
+    - Double-click the `run_this.bat` file to execute it. This file will run the PowerShell script with the necessary permissions.
 
-5. **Run the Script:**
-    - Copy and paste the following code:
-      ```bash
-      powershell.exe -ExecutionPolicy Bypass -File "C:\Path\To\Your\Script\WUShowHideToolAlt.ps1"
-      ```
-    - Replace `C:\Path\To\Your\Script\WUShowHideToolAlt.ps1` with the actual path to the script on your machine, and be sure to enclose the path in double quotes (`"`).
-
-6. **Install `PSWindowsUpdate` Module:**
+5. **Install `PSWindowsUpdate` Module:**
     - If prompted, type `Y` and press enter.
 
-7. **Let the Script Run:**
+6. **Let the Script Run:**
     - The script will perform its tasks automatically and create a scheduled task for future automatic executions.
-    - The script will take around 3 minutes to finish executing. Be patient.
+    - The script will take around 4-5 minutes to finish executing. Be patient.
 
-8. **Important! Run DDU (Display Driver Uninstaller):**
+7. **Important! Run DDU (Display Driver Uninstaller):**
     - Follow the instructions in the video below:
       `(Do the DDU safe mode method.)`
         - [How to download and use DDU (Display Driver Uninstaller)](https://youtu.be/1XlwirtWs_c?si=aw5g3N4NUi8TGURM&t=142)
 
-9. **Download and Install the Appropriate GPU Driver After Reboot:**
+8. **Download and Install the Appropriate GPU Driver After Reboot:**
     - Download the latest GPU driver from the respective links:
         - **AMD**: [AMD Drivers](https://www.amd.com/en/support/download/drivers.html)
             - ***Also download Chipset drivers along with GPU drivers for AMD.***
         - **Nvidia**: [Nvidia Drivers](https://www.nvidia.com/download/index.aspx)
         - **Intel**: [Intel Drivers](https://www.intel.com/content/www/us/en/download-center/home.html)
 
-10. **Enable / Resume Windows Update back in Settings**
+9. **Enable / Resume Windows Update back in Settings**
 
-11. **Verify the Task and Script:**
+10. **Verify the Task and Script:**
     - If everything is done correctly, there will be a `HideOldGPUDriversFromWU.ps1` file in the ***root of your C: Drive*** and a task named `HideOldGPUDriversFromWU` in ***Task Scheduler***.
 
     ### `HideOldGPUDriversFromWU.ps1` file in C: Drive:
