@@ -81,7 +81,10 @@ A scheduled task is created to run a PowerShell script at logon that hides old G
 4. **Run the `run_this.bat` file**:
     - Locate the `run_this.bat` file in the directory where you extracted or cloned the repository.
     - Double-click the `run_this.bat` file to execute it. This file will run the PowerShell script with the necessary permissions.
-
+    - If Windows SmartScreen appears, warning you that the file might be unsafe, follow these steps to bypass it:
+       - Click on **More info**.
+       - Then click **Run anyway**.
+       - The script will then execute with the necessary permissions.
 5. **Install `PSWindowsUpdate` Module:**
     - If prompted, type `Y` and press enter.
 
