@@ -133,6 +133,17 @@ foreach ($service in $services) {
     }
 }
 
+# Enable Delivery Optimization service by setting the Start value of the DoSvc service to 2
+Write-Host "Enabling Delivery Optimization..."
+
+$deliveryOptimizationServicePath = "HKLM:\SYSTEM\CurrentControlSet\Services\DoSvc"
+if (Test-Path $deliveryOptimizationServicePath) {
+    Set-ItemProperty -Path $deliveryOptimizationServicePath -Name "Start" -Value 2
+    Write-Host "Delivery Optimization service has been enabled."
+} else {
+    Write-Host "Delivery Optimization service registry path not found."
+}
+
 # Define the path for the script to be copied
 $scriptPath = "C:\HideOldGPUDriversFromWU.ps1"
 

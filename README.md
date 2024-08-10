@@ -16,7 +16,7 @@ This script performs a series of maintenance tasks on a Windows system, includin
 
 1. **Administrative Privileges Check**: Ensures the script is running with administrative privileges. If not, it restarts itself with elevated permissions.
 2. **Disk Cleanup**: Configures and runs the Disk Cleanup tool (`cleanmgr`) with specific cleanup options.
-3. **Delivery Optimization Service**: Disables the Delivery Optimization service to prevent unnecessary background data transfer.
+3. **Delivery Optimization Service**: Disables the Delivery Optimization service temporarily to prevent unnecessary background data transfer from interrupting the script.
 4. **SoftwareDistribution Folder Cleanup**: Takes full ownership, cleans up the SoftwareDistribution folder, and restores default ownership.
 5. **GPU Driver Hiding**: Installs the PSWindowsUpdate module (if not already installed) and hides old GPU drivers from Windows Update.
 6. **Scheduled Task Creation**: Saves the script to C: drive and schedules it to run at logon to hide old GPU drivers.
@@ -32,7 +32,7 @@ The script first checks if it's running as an administrator. If not, it attempts
 The script sets specific cleanup options and runs `cleanmgr` to perform disk cleanup. After cleanup, it removes the state flags from the registry.
 
 ### 3. Delivery Optimization Service
-The script disables the Delivery Optimization service by setting its startup type to disabled.
+The script disables the Delivery Optimization service by setting its startup type to disabled temporarily and enables it back after SoftwareDistribution folder Cleanup.
 
 ### 4. SoftwareDistribution Folder Cleanup
 The script stops Windows Update services, takes ownership of the `SoftwareDistribution` folder, deletes its contents with a retry mechanism, and restores the folder’s ownership to default settings.
