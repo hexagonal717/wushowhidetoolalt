@@ -32,7 +32,7 @@ The script first checks if it's running as an administrator. If not, it attempts
 The script sets specific cleanup options and runs `cleanmgr` to perform disk cleanup. After cleanup, it removes the state flags from the registry.
 
 ### 3. Delivery Optimization Service
-The script disables the Delivery Optimization service by setting its startup type to disabled temporarily and enables it back after SoftwareDistribution folder Cleanup.
+The script temporarily disables the Delivery Optimization service by setting its startup type to 'Disabled' and then re-enables it after cleaning up the SoftwareDistribution folder.
 
 ### 4. SoftwareDistribution Folder Cleanup
 The script stops Windows Update services, takes ownership of the `SoftwareDistribution` folder, deletes its contents with a retry mechanism, and restores the folder’s ownership to default settings.
