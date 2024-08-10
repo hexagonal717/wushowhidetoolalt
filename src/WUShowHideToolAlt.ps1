@@ -137,7 +137,7 @@ foreach ($service in $services) {
 $scriptPath = "C:\HideOldGPUDriversFromWU.ps1"
 
 # Define the keywords to search for in update titles
-$hideKeywords = @("Intel", "AMD", "NVIDIA", "Advanced Micro Devices", "Display")
+$hideKeywords = @("NVIDIA - Display", "Advanced Micro Devices, Inc. - Display", "NVIDIA", "ATI Technologies Inc. - Display", "Display","Intel Corporation - Display","nVidia - Display")
 
 # Function to hide old GPU drivers from Windows Update
 function Hide-OldGPUDrivers {
@@ -165,12 +165,17 @@ function Hide-OldGPUDrivers {
             # Check if the title contains any hideKeywords
             if ($hideKeywords | Where-Object { $title -match $_ }) {
                 # Hide updates that match hideKeywords
-                Hide-WindowsUpdate -Title $title -Confirm:$false
+                Write-Host ""
                 Write-Host "Hiding Old GPU drivers..."
+                Hide-WindowsUpdate -Title $title -Confirm:$false
+                Write-Host ""
+                Write-Host "Hidden update: $title"
             }
         }
+        Write-Host ""
         Write-Host "Old GPU drivers have been successfully hidden from Windows Update."
     } else {
+        Write-Host ""
         Write-Host "No old GPU drivers have been found in Windows Update."
     }
 }
@@ -193,7 +198,7 @@ if (-not (Test-IsAdministrator)) {
 }
 
 # Define the keywords to search for in update titles
-$hideKeywords = @("Intel", "AMD", "NVIDIA", "Advanced Micro Devices", "Display")
+$hideKeywords = @("NVIDIA - Display", "Advanced Micro Devices, Inc. - Display", "NVIDIA", "ATI Technologies Inc. - Display", "Display","Intel Corporation - Display","nVidia - Display")
 
 # Import the PSWindowsUpdate module
 if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
@@ -274,5 +279,6 @@ try {
 Hide-OldGPUDrivers
 
 # Keep the script running until the user closes it manually
+Write-Host ""
 Write-Host "Press Enter to exit..."
 Read-Host
