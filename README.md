@@ -56,17 +56,21 @@ A scheduled task is created to run a PowerShell script at logon that hides old G
 ## How to Use
 
 1. **Download Instructions for the Script:**
-    - If you want to download the entire repository, you can do so by cloning it using Git or by downloading it as a ZIP file.
+   
+   - **From the Releases Section:**
+        - Navigate to the [Releases](https://github.com/hexagonal717/wushowhidetoolalt/releases) page of the repository.
+        - Download the latest release.
+        - Extract the ZIP file to access the `WUShowHideToolAlt`.
     - **To download as a ZIP file:**
-        - On the main repository page, click the **Code** button (usually green) and select **Download ZIP**.
-        - Extract the ZIP file to access the `WUShowHideToolAlt.ps1` script.
+        - On the main repository page, click the **Code** button and select **Download ZIP**.
+        - Extract the ZIP file to access the `WUShowHideToolAlt`.
     - **To clone using Git:**
         - Open Git Bash or a terminal.
         - Run the following command:
           ```bash
           git clone https://github.com/hexagonal717/wushowhidetoolalt
           ```
-        - This will clone the entire repository to your local machine, and you can access the `WUShowHideToolAlt.ps1` script.
+        - This will clone the entire repository to your local machine, and you can access the `WUShowHideToolAlt`.
 
 2. **Ensure an Internet Connection:**
     - The script depends on Windows Update to retrieve the old drivers from the server so that it can block the old drivers.
